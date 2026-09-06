@@ -17,7 +17,17 @@ function str(name: string, fallback: string): string {
 
 /** HTTP server bind host (custom Node server in `server/index.ts`). */
 export function envServerHost(): string {
-  return str("HOST", "localhost");
+  const raw = process.env.HOST?.trim();
+  if (!raw) {
+    return process.env.NODE_ENV === "production" ? "0.0.0.0" : "localhost";
+  }
+  // Server bind host must be a local network interface (like 0.0.0.0, 127.0.0.1, or localhost).
+  // If a full URL or external domain is accidentally provided (e.g. https://... or domain.railway.app),
+  // fallback safely to "0.0.0.0" to prevent getaddrinfo ENOTFOUND crashes.
+  if (raw.includes("://") || raw.includes("/") || (raw.includes(".") && !/^\d{1,3}(\.\d{1,3}){3}$/.test(raw))) {
+    return "0.0.0.0";
+  }
+  return raw;
 }
 
 /** HTTP server port. */
