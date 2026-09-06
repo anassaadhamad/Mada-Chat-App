@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "description": "A modern, secure real-time messaging application with AI personas, voice/video calls, and PWA support built on Next.js 16, Socket.io, and MongoDB.",
   "private": true,
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "scripts": {
     "dev": "tsx watch server/index.ts",
     "build": "next build",
