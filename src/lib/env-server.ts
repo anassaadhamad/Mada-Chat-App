@@ -91,16 +91,35 @@ export function envMessageListOlderPageMax(): number {
   return int("MESSAGE_LIST_OLDER_PAGE_MAX", 200);
 }
 
-// —— OpenAI (AI persona reply; server-only) ——
+// —— AI (OpenRouter / OpenAI-compatible; server-only) ——
 
-export function envOpenAiApiKey(): string | null {
-  const v = process.env.OPENAI_API_KEY?.trim();
+export function envAiApiKey(): string | null {
+  const v =
+    process.env.OPENROUTER_API_KEY?.trim() ||
+    process.env.AI_API_KEY?.trim() ||
+    process.env.OPENAI_API_KEY?.trim();
   return v && v.length > 0 ? v : null;
 }
 
-export function envOpenAiChatModel(): string {
-  return str("OPENAI_CHAT_MODEL", "gpt-5.4-mini-2026-03-17");
+export function envAiModel(): string {
+  const v =
+    process.env.OPENROUTER_MODEL?.trim() ||
+    process.env.AI_MODEL?.trim() ||
+    process.env.OPENAI_CHAT_MODEL?.trim();
+  return v && v.length > 0 ? v : "meta-llama/llama-3.3-70b-instruct";
 }
+
+export function envAiBaseUrl(): string {
+  const raw =
+    process.env.OPENROUTER_BASE_URL?.trim() ||
+    process.env.AI_BASE_URL?.trim() ||
+    "https://openrouter.ai/api/v1";
+  return raw.replace(/\/+$/, "");
+}
+
+/** Backward compatibility aliases */
+export const envOpenAiApiKey = envAiApiKey;
+export const envOpenAiChatModel = envAiModel;
 
 /** IANA timezone for AI transcript timestamps and current-time context (e.g. Africa/Cairo, America/New_York). */
 export function envAiAgentTimeZone(): string {

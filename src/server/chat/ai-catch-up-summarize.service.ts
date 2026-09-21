@@ -4,8 +4,9 @@ import { Conversation } from "@/server/models/Conversation";
 import { Message } from "@/server/models/Message";
 import { User } from "@/server/models/User";
 import {
-  envOpenAiApiKey,
-  envOpenAiChatModel,
+  envAiApiKey,
+  envAiModel,
+  envAiBaseUrl,
   envAiAgentMaxCompletionTokens,
 } from "@/lib/env-server";
 import { assertConversationMessagingAllowed } from "@/server/blocking.service";
@@ -65,34 +66,38 @@ function formatMessageLine(
 }
 
 async function openAiSummarize(system: string, user: string): Promise<string> {
-  const key = envOpenAiApiKey();
+  const key = envAiApiKey();
   if (!key) {
-    throw new Error("OPENAI_API_KEY is not set");
+    throw new Error("AI API Key is not set (set OPENROUTER_API_KEY or AI_API_KEY)");
   }
   const cap = Math.min(1200, Math.max(256, envAiAgentMaxCompletionTokens()));
+  const baseUrl = envAiBaseUrl();
+  const endpoint = `${baseUrl}/chat/completions`;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 90_000);
   try {
-    const res = await fetch("https://api.openai.com/v1/chat/completions", {
+    const res = await fetch(endpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${key}`,
+        "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL || "https://mada.anas.lol",
+        "X-Title": "Mada Chat App",
       },
       body: JSON.stringify({
-        model: envOpenAiChatModel(),
+        model: envAiModel(),
         messages: [
           { role: "system", content: system },
           { role: "user", content: user },
         ],
         temperature: 0.35,
-        max_completion_tokens: cap,
+        max_tokens: cap,
       }),
       signal: controller.signal,
     });
     if (!res.ok) {
       const errText = await res.text().catch(() => "");
-      throw new Error(`OpenAI HTTP ${res.status}: ${errText.slice(0, 200)}`);
+      throw new Error(`OpenRouter HTTP ${res.status}: ${errText.slice(0, 200)}`);
     }
     const data = (await res.json()) as {
       choices?: { message?: { content?: string | null } }[];

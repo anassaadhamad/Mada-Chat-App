@@ -14,7 +14,7 @@ export async function POST(request: Request, context: RouteContext) {
 
   if (!envOpenAiApiKey()) {
     return NextResponse.json(
-      { error: "AI summaries are not configured (missing OPENAI_API_KEY)." },
+      { error: "AI summaries are not configured (missing OPENROUTER_API_KEY or AI_API_KEY)." },
       { status: 503 }
     );
   }
