@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireActiveUser } from "@/server/require-active-user";
-import { envOpenAiApiKey } from "@/lib/env-server";
+import { envHasAiConfigured } from "@/lib/env-server";
 import { parseClientClockFromRequestBody } from "@/lib/ai-client-clock";
 import { generateCatchUpSummary } from "@/server/chat/ai-catch-up-summarize.service";
 
@@ -12,9 +12,9 @@ export async function POST(request: Request, context: RouteContext) {
   const gate = await requireActiveUser();
   if (!gate.ok) return gate.response;
 
-  if (!envOpenAiApiKey()) {
+  if (!envHasAiConfigured()) {
     return NextResponse.json(
-      { error: "AI summaries are not configured (missing OPENROUTER_API_KEY or AI_API_KEY)." },
+      { error: "AI summaries are not configured (missing OPENROUTER_API_KEY or GROQ_API_KEY)." },
       { status: 503 }
     );
   }

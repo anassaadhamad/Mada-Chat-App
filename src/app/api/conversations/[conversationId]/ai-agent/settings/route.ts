@@ -22,6 +22,7 @@ export async function GET(_request: Request, context: RouteContext) {
     return NextResponse.json({
       ...settings,
       openAiConfigured: Boolean(envOpenAiApiKey()),
+      aiConfigured: Boolean(envOpenAiApiKey()),
     });
   } catch (e) {
     const msg = e instanceof Error ? e.message : "";

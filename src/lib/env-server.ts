@@ -117,8 +117,31 @@ export function envAiBaseUrl(): string {
   return raw.replace(/\/+$/, "");
 }
 
+// —— Groq (Fast Fallback Provider; server-only) ——
+
+export function envGroqApiKey(): string | null {
+  const v = process.env.GROQ_API_KEY?.trim();
+  return v && v.length > 0 ? v : null;
+}
+
+export function envGroqModel(): string {
+  return str("GROQ_MODEL", "llama-3.3-70b-versatile");
+}
+
+export function envGroqBaseUrl(): string {
+  const raw = process.env.GROQ_BASE_URL?.trim() || "https://api.groq.com/openai/v1";
+  return raw.replace(/\/+$/, "");
+}
+
+/** Check if any AI provider (OpenRouter or Groq) is configured */
+export function envHasAiConfigured(): boolean {
+  return Boolean(envAiApiKey() || envGroqApiKey());
+}
+
 /** Backward compatibility aliases */
-export const envOpenAiApiKey = envAiApiKey;
+export function envOpenAiApiKey(): string | null {
+  return envAiApiKey() || envGroqApiKey();
+}
 export const envOpenAiChatModel = envAiModel;
 
 /** IANA timezone for AI transcript timestamps and current-time context (e.g. Africa/Cairo, America/New_York). */

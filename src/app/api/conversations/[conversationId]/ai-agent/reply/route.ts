@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireActiveUser } from "@/server/require-active-user";
 import { runPersonaReplyJob } from "@/server/chat/ai-persona-reply.service";
-import { envOpenAiApiKey } from "@/lib/env-server";
+import { envHasAiConfigured } from "@/lib/env-server";
 import { parseClientClockFromRequestBody } from "@/lib/ai-client-clock";
 
 export const maxDuration = 120;
@@ -12,9 +12,9 @@ export async function POST(request: Request, context: RouteContext) {
   const gate = await requireActiveUser();
   if (!gate.ok) return gate.response;
 
-  if (!envOpenAiApiKey()) {
+  if (!envHasAiConfigured()) {
     return NextResponse.json(
-      { error: "AI replies are not configured (missing OPENROUTER_API_KEY or AI_API_KEY)." },
+      { error: "AI replies are not configured (missing OPENROUTER_API_KEY or GROQ_API_KEY)." },
       { status: 503 }
     );
   }
